@@ -125,7 +125,7 @@ public class EnvironmentController {
             label = normalize(label);
             Environment environment = this.repository.findOne(name, profiles, label, includeOrigin);
             addDatabaseConfiguration(environment, profiles);
-            if (!this.acceptEmpty && (environment == null || environment.getPropertySources().isEmpty())) {
+            if (!this.acceptEmpty && checkIfEnvironmentFound(environment)) {
                 throw new EnvironmentNotFoundException("Profile Not found");
             }
             return environment;
@@ -137,6 +137,10 @@ public class EnvironmentController {
         }
     }
 
+    private boolean checkIfEnvironmentFound(Environment environment){
+        return (environment == null || environment.getPropertySources().isEmpty());
+    }
+
     private void addDatabaseConfiguration(Environment environment, String parentProfile){
         Map propertySource = environment.getPropertySources().get(0).getSource();
         String connectionName = (String) propertySource.get(SPRING_DATABASE_CONNECTION_NAME);
@@ -144,6 +148,9 @@ public class EnvironmentController {
         if (!StringUtils.isEmptyOrNull(connectionName)){
             String activeProfile = StringUtils.isEmptyOrNull(profile) ? parentProfile : profile;
             Environment databaseEnvironment = this.repository.findOne(connectionName, activeProfile, null, false);
+            if (checkIfEnvironmentFound(environment)){
+                throw new EnvironmentNotFoundException("Database Profile Not found");
+            }
             Map databaseSource = databaseEnvironment.getPropertySources().get(0).getSource();
             propertySource.putAll(databaseSource);
             propertySource.remove(SPRING_DATABASE_CONNECTION_NAME);
