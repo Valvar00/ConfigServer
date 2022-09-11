@@ -7,3 +7,4 @@ spring:
         git:
           uri: https://github.com/Valvar00/ConfigServiceRepository
           default-label: master
+          searchPaths: '{application}/{profile}'

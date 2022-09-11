@@ -141,12 +141,14 @@ public class EnvironmentController {
         Map propertySource = environment.getPropertySources().get(0).getSource();
         String connectionName = (String) propertySource.get(SPRING_DATABASE_CONNECTION_NAME);
         String profile = (String) propertySource.get(SPRING_DATABASE_CONNECTION_PROFILE);
-        String activeProfile = StringUtils.isEmptyOrNull(profile) ? parentProfile : profile;
-        Environment databaseEnvironment = this.repository.findOne(connectionName, activeProfile, null, false);
-        Map databaseSource = databaseEnvironment.getPropertySources().get(0).getSource();
-        propertySource.putAll(databaseSource);
-        propertySource.remove(SPRING_DATABASE_CONNECTION_NAME);
-        propertySource.remove(SPRING_DATABASE_CONNECTION_PROFILE);
+        if (!StringUtils.isEmptyOrNull(connectionName)){
+            String activeProfile = StringUtils.isEmptyOrNull(profile) ? parentProfile : profile;
+            Environment databaseEnvironment = this.repository.findOne(connectionName, activeProfile, null, false);
+            Map databaseSource = databaseEnvironment.getPropertySources().get(0).getSource();
+            propertySource.putAll(databaseSource);
+            propertySource.remove(SPRING_DATABASE_CONNECTION_NAME);
+            propertySource.remove(SPRING_DATABASE_CONNECTION_PROFILE);
+        }
     }
 
     private String normalize(String part) {
